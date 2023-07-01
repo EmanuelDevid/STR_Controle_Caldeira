@@ -1,0 +1,9 @@
+java -jar .\Aquecedor.jar 4545
+
+cd /mnt/c/UFC/2023.1/STR/Trabalho/Code
+
+gcc -o main *.c -lpthread
+
+ip r
+
+./main 172.30.208.1 4545

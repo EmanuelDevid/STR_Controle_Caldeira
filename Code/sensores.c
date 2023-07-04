@@ -5,7 +5,7 @@
 
 static pthread_mutex_t exclusao_mutua = PTHREAD_MUTEX_INITIALIZER; 
 static pthread_cond_t alarme = PTHREAD_COND_INITIALIZER; 
-static double s_temp = 0, s_nivel = 0; 
+static double s_temp = 0, s_nivel = 0, s_temp_ambi = 0, s_temp_entr = 0, s_fluxo_said = 0;  
 static double limite_atual = HUGE_VAL;
 
 /* Chamado pela thread que le o sensor e disponibiliza aqui o valor lido */
@@ -19,7 +19,7 @@ static double limite_atual = HUGE_VAL;
  }
  
  /* Chamado por qualquer thread que precisa do valor lido do sensor */ 
- double sensor_get(char s[5]) {
+/*  double sensor_get(char s[5]) {
 	 double aux; 
 	 pthread_mutex_lock( &exclusao_mutua); 
 	 if (strncmp(s,"t",1)==0)
@@ -28,7 +28,26 @@ static double limite_atual = HUGE_VAL;
 	 aux = s_nivel;		
 	 pthread_mutex_unlock( &exclusao_mutua); 
 	 return aux;
+ } */
+
+/* Chamado por qualquer thread que precisa do valor lido do sensor */ 
+ double sensor_get(char s[5]) {
+	 double aux; 
+	 pthread_mutex_lock( &exclusao_mutua); 
+	 if (strncmp(s,"t",1)==0) //Valor da Temperatura
+	 aux = s_temp;
+	 else if(strncmp(s,"h",1)==0) //Valor do nivel da agua
+	 aux = s_nivel;		
+	 else if(strncmp(s,"ta",1)==0) //Valor da temperatura do ambiente
+	 aux = s_temp_ambi;
+	 else if(strncmp(s,"ti",1)==0) //Valor da temperatura da agua que entra no ambiente pelo atuador Ni
+	 aux = s_temp_entr;
+	 else if(strncmp(s,"no",1)==0) //Valor do fluxo de agua de saida do recipiente
+	 aux = s_fluxo_said;
+	 pthread_mutex_unlock( &exclusao_mutua); 
+	 return aux;
  }
+
 
 /* Thread fica bloqueada até o valor do sensor chegar em limite */ 
 void sensor_alarmeT( double limite) {

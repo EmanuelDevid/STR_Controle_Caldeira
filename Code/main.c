@@ -12,7 +12,7 @@
 
 #define NSEC_PER_SEC (1000000000) // Numero de nanosegundos em um segundo
 
-#define N_AMOSTRAS 1000
+#define N_AMOSTRAS 10000
 
 void thread_mostra_status(void)
 {
@@ -160,7 +160,7 @@ void thread_controle_nivel(void)
 
 		nivel = sensor_get("h");
 		ref_nivel = ref_getN();
-		// no = sensor_get("no");
+		no = sensor_get("no");
 		// ti = sensor_get("ti");
 
 		if (nivel > ref_nivel)
@@ -175,13 +175,9 @@ void thread_controle_nivel(void)
 			msg_socket(msg_enviada);
 		}
 
-		if (nivel <= ref_nivel)
+		if (nivel < ref_nivel)
 		{ // Aumentar nível
-
-			// ti = sensor_get("ti");	// Valor da temperatura da agua que entra no ambiente pelo atuador Ni
-			// temp = sensor_get("t"); // temperatura da caldeira
-
-			sprintf(msg_enviada, "ana%lf", 100.0);
+			sprintf(msg_enviada, "ana%lf", 150.0);
 			msg_socket(msg_enviada);
 
 			sprintf(msg_enviada, "anf%lf", 0.0);
@@ -214,7 +210,7 @@ void thread_controle_nivel(void)
 void thread_grava_temp_resp(void)
 {
 	FILE *dados_f;
-	dados_f = fopen("dados2.txt", "w");
+	dados_f = fopen("temperatura.txt", "w");
 	if (dados_f == NULL)
 	{
 		printf("Erro, nao foi possivel abrir o arquivo\n");

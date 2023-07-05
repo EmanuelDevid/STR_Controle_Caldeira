@@ -12,20 +12,26 @@
 
 #define NSEC_PER_SEC (1000000000) // Numero de nanosegundos em um segundo
 
-#define N_AMOSTRAS 10000
+#define N_AMOSTRAS 5000
 
 void thread_mostra_status(void)
 {
-	double t, h;
+	double t, h, no, ta, ti;
 	while (1)
 	{
 		t = sensor_get("t");
 		h = sensor_get("h");
+		ta = sensor_get("ta");
+		ti = sensor_get("ti");
+		no = sensor_get("no");
 		aloca_tela();
 		system("tput reset");
 		printf("---------------------------------------\n");
 		printf("Temperatura (T)--> %.2lf\n", t);
 		printf("Nivel       (H)--> %.2lf\n", h);
+		printf("Temperatura do ambiente (Ta)--> %.2lf\n", ta);
+		printf("Temperatura de entrada da agua(Ti)--> %.2lf\n", ti);
+		printf("Fluxo de agua de saida (No)--> %.2lf\n", no);
 		printf("---------------------------------------\n");
 		libera_tela();
 		sleep(1);
@@ -84,7 +90,6 @@ void thread_controle_temperatura(void)
 	t.tv_sec++;
 	while (1)
 	{
-
 		// Espera ateh inicio do proximo periodo
 		clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &t, NULL);
 
@@ -107,7 +112,6 @@ void thread_controle_temperatura(void)
 
 		if (temp <= ref_temp)
 		{ // aumenta temperatura
-
 			if ((ref_temp - temp) * 20 > 10.0) // ajustes grandes
 				na = 10.0;					   // quanto mais se aproxima do objetivo de temperatura, menor será a entrada de agua quente Na
 			else
@@ -147,8 +151,8 @@ void thread_controle_nivel(void)
 	char msg_enviada[1000];
 	long atraso_fim;
 	struct timespec t, t_fim;
-	long periodo = 10e6; // 50ms
-	double nivel, ref_nivel, no, ti, na, ni, temp;
+	long periodo = 50e6; // 50ms
+	double nivel, ref_nivel;
 
 	// Le a hora atual, coloca em t
 	clock_gettime(CLOCK_MONOTONIC, &t);
@@ -160,8 +164,7 @@ void thread_controle_nivel(void)
 
 		nivel = sensor_get("h");
 		ref_nivel = ref_getN();
-		no = sensor_get("no");
-		// ti = sensor_get("ti");
+		double na, ni;
 
 		if (nivel > ref_nivel)
 		{ // Diminuir nível
@@ -175,15 +178,16 @@ void thread_controle_nivel(void)
 			msg_socket(msg_enviada);
 		}
 
-		if (nivel < ref_nivel)
+		if (nivel <= ref_nivel)
 		{ // Aumentar nível
-			sprintf(msg_enviada, "ana%lf", 150.0);
+			
+			sprintf(msg_enviada, "ana%lf", 10.0);
 			msg_socket(msg_enviada);
 
 			sprintf(msg_enviada, "anf%lf", 0.0);
 			msg_socket(msg_enviada);
 
-			sprintf(msg_enviada, "ani%lf", 0.0);
+			sprintf(msg_enviada, "ani%lf", 10.0);
 			msg_socket(msg_enviada);
 		}
 
